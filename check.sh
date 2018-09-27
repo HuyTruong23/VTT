@@ -1,0 +1,28 @@
+# Hello World Program in Bash Shell
+echo -e "\nResult_1:"; check=`uname -r`; echo $check;
+echo -e "\nResult_2.1:"; check=`cat /etc/passwd | grep /*sh$ | awk -F: '{print $1}'`; if [[ -z $check ]]; then echo "$check ==> Warning"; else echo "$check ==> OK"; fi; echo "";
+echo -e "\nResult_2.2:"; check=`awk -F: '($2 == "") {print $1}' /etc/shadow`; if [[ -z $check ]]; then echo "$check ==> OK"; else echo "Warning"; fi; echo "";
+echo -e "\nResult_2.3:"; check=`awk -F: '( $3 == "0") {print}' /etc/passwd`; echo $check; if [[ $check = "root:x:0:0:root:/root:/bin/bash" ]]; then echo "==> OK"; else echo "==> WARNING"; fi; echo "";
+echo -e "\nResult_2.4:"; check1=`cat /etc/pam.d/system-auth | grep "cracklib.so\|pam_passwdqc" | grep -v "^#"`; echo $check1 ;check=`cat /etc/pam.d/system-auth | grep -v ^# | grep -w password | grep -w "retry=3" | grep -w "minlen=8" | grep -w "dcredit=-1" | grep -w "ucredit=-1" | grep -w "ocredit=-1" | grep -w "lcredit=-1"` ; if [[ -z $check ]]; then echo "Chua cau hinh password kho (retry 3 minlen 8 hoa thuong so ky tu?) ==> WARNING"; else echo -e "Da cau hinh chi password kho:\n$check\n==> OK";fi; echo "";
+echo -e "\nResult_2.5:"; check=`authconfig --test | grep hashing | grep sha512`; if [[ -z $check ]]; then echo "Chua cau hinh ma hoa sha512 ==> WARNING"; else echo -e "Da cau hinh ma hoa sha512:\n$check\n==> OK";fi; echo "";
+echo -e "\nResult_2.6:"; check=`cat /etc/login.defs | grep "PASS_MAX_DAYS" | grep -v "^#"`; echo $check; if [[ $check = "PASS_MAX_DAYS 90" ]]; then echo "==> OK"; else echo "==> WARNING";fi; echo "";
+echo -e "\nResult_2.7:"; check=`cat /etc/pam.d/system-auth | grep -v ^# | grep -w password | grep -w sha512 | grep -w "remember=5"`; if [[ -z $check ]]; then echo "Chua cau hinh password kho (sha512 remember 5?) ==> WARNING"; else echo -e "Da cau hinh chi password kho:\n$check\n==> OK";fi; echo "";
+echo -e "\nResult_3.1a: (rsyslog)"; array=("*.info;mail.none;authpriv.none;cron.none" "/var/log/messages" "authpriv.*" "/var/log/secure"); for i in "${array[@]}"; do check=`cat /etc/rsyslog.conf | grep -v "^#" | grep -v "^$" | grep -w "$i"`; if [[ $check == *$i* ]]; then echo "$i ==> OK" ; else echo "$i ==> WARNING";fi;done; echo "";
+echo -e "\nResult_3.1a: (RotateLog)"; array=("/var/log/cron" "/var/log/maillog" "/var/log/messages" "/var/log/secure" "/var/log/spooler" "{" "compress" "sharedscripts" "postrotate" "/bin/kill -HUP \`cat /var/run/syslogd.pid 2> /dev/null\` 2> /dev/null || true"  "endscript" "}"); for i in "${array[@]}"; do check=`cat /etc/logrotate.d/syslog | grep -v ^# | grep -w "$i"`; if [[ $check == *$i* ]] ; then echo "$i ==> OK" ; else echo "$i ==> WARNING";fi;done; echo "";
+echo -e "\nResult_3.1c: (Check service syslog)"; check=`ps -ef | grep -i "syslog"`; if [[ -z $check ]]; then echo "Khong co tien trinh dang chay ==> WARNING"; else echo "Running ==> OK";fi; echo "";
+echo -e "\nResult_3.2: (log file)"; array=("messages" "secure" "utmp" "wtmp"); for i in "${array[@]}"; do check=`ls -tl /var/log/ | awk '{print$1"\t"$3"\t"$4"\t"$9}' | grep "^-" | grep -w "$i"`; if [[ -z $check ]]; then echo "$check"; else echo "$check";fi;done; echo "";
+echo -e "\nResult_4.1:"; check=`/sbin/chkconfig --list | grep iptables`; echo $check;
+echo -e "\nResult_4.1: (Check service iptables)"; check=`service iptables status | grep "Firewall is not running"`; if [[ -z $check ]]; then echo "iptables dang hoat dong ==> OK"; else echo -e "iptables khong hoat dong:\n$check ==> WARNING";fi; echo "";
+echo -e "\nResult_4.2: (Check rules iptables):"; check=`cat /etc/sysconfig/iptables`; echo $check;
+echo -e "\nResult_4.3: (Check rules log iptables):"; check=`cat /etc/sysconfig/iptables | grep "LOG"`; echo $check;
+echo -e "\nResult_5: (Check service system)"; check=`netstat -lnptu|grep "telnet\|rlogin\|rsh\|rcp\|nis\|tftp rpm -qa|grep "telnet\|rlogin\|rsh\|rcp\|nis\|tftp""`; echo $check; if [[ -z $check ]]; then echo "==> OK"; else echo "==> WARNING";fi; echo "";
+echo -e "\nResult_6.1: (Check remote)"; check=`ps -ef | grep -i "telnet\|vnc"`; if [[ -z $check ]]; then echo "$check"; else echo "$check";fi; echo "";
+echo -e "\nResult_6.2: (Protocol 2)"; check=`cat /etc/ssh/sshd_config | grep "Protocol" | grep -v "^#"`; echo $check; if [[ -z $check ]]; then echo "==> WARNING"; else echo "==> OK";fi; echo "";
+echo -e "\nResult_6.3: (AllowUser ssh)";check=`cat /etc/ssh/sshd_config | grep "AllowUsers" | grep -v "^#"`; echo $check ;if [[ -z $check ]] ; then echo "==> WARNING"; else echo "==> OK"; fi; echo "";
+echo -e "\nResult_6.4: (Time OUT)"; check=`cat /etc/profile | grep "TMOUT" | grep -v "^#"`; echo "$check\n"; if [[ -z $check ]]; then echo "==> WARNING"; else echo "==> OK";fi; echo "";
+echo -e "\nResult_6.5: (PermitRootLogin)"; check=`cat /etc/ssh/sshd_config| grep "PermitRootLogin" | grep -v "^#"`; echo $check; if [[ -z $check ]]; then echo "==> WARNING"; else echo "==> OK";fi; echo "";
+echo -e "\nResult_7.1: (PATH)"; check=`echo $PATH | tr ":" "\n"`; echo "$check";
+echo -e "\nResult_8: (Sync time)"   ;  
+echo -e "\nResult_9.1: (cron.deny)"; check=`ls /etc/ | grep cron.deny`; if [[ -z $check ]]; then echo "Da xoa file /etc/cron.deny ==> OK"; else echo "Chua xoa file /etc/cron.deny ==> WARNING";fi; echo "";
+echo -e "\nResult_9.2: (cron.allow)"; check=`ls /etc/ | grep cron.allow`; if [[ -z $check ]]; then echo "Chua tao file /etc/cron.allow ==> WARNING"; else echo "Da tao file /etc/cron.allow ==> OK";fi; echo "";
+echo -e "\nResult_9.3: (Cap quyen)"; check=`ls -al /etc/ | grep "cron.hourly\|cron.daily\|cron.weekly\|cron.monthly\|cron.d"`; echo "$check\n"; 
